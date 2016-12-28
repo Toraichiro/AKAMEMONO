@@ -1,11 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {
 
     public GameObject chipPrefab;
     public GameObject chipBase;
+
+	public Text debugText;
 
 	// Use this for initialization
 	void Start () {
@@ -23,6 +26,32 @@ public class GameController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		if( Input.touchCount > 0)
+		{
+			print("TOUCH COUNT : " + Input.touchCount);
+		}
+
+
+		if (TouchControl.singleFingerUpSwipe)
+		{
+			debugText.text = "SWIPE : UP";
+		}
+		else if (TouchControl.singleFingerDownSwipe)
+		{
+			debugText.text = "SWIPE : DOWN";
+		}
+		else if (TouchControl.singleFingerRightSwipe)
+		{
+			debugText.text = "SWIPE : RIGHT";
+		}
+		else if (TouchControl.singleFingerLeftSwipe)
+		{
+			debugText.text = "SWIPE : LEFT";
+		}
+		else if (TouchControl.singleFingerTap)
+		{
+			debugText.text = "TAP : SINGLE";
+		}
+
 	}
 }
