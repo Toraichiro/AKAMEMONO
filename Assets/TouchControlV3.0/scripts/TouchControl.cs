@@ -79,8 +79,24 @@ public class TouchControl : MonoBehaviour
 				
 			}
 		} else if (singleTouch) {
+#if UNITY_EDITOR
+			if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0)) {
+				Touch touch = new Touch();
+
+				touch.position = Input.mousePosition;
+				if (Input.GetMouseButtonDown(0) )
+				{
+					touch.phase = TouchPhase.Began;
+				}
+				else
+				{
+					touch.phase = TouchPhase.Ended;
+				}
+
+#else
 			if (Input.touchCount == 1) {
 				Touch touch = Input.touches [0];
+#endif
 				switch (touch.phase) {
 				case TouchPhase.Began:
 					touchPos = touch.position;
