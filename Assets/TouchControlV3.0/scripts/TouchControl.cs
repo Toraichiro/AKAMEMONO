@@ -71,20 +71,28 @@ public class TouchControl : MonoBehaviour
 
 	void Update ()
 	{
-		if (multiTouch) {
-			if (Input.touchCount == 0) {
+		if (multiTouch)
+		{
+			if (Input.touchCount == 0)
+			{
 				singleTouch = true;
 				multiTouch = false;
-			} else {
-				
 			}
-		} else if (singleTouch) {
+			else
+			{
+
+			}
+		}
+		else if (singleTouch)
+		{
+
 #if UNITY_EDITOR
-			if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0)) {
+			if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(0))
+			{
 				Touch touch = new Touch();
 
 				touch.position = Input.mousePosition;
-				if (Input.GetMouseButtonDown(0) )
+				if (Input.GetMouseButtonDown(0))
 				{
 					touch.phase = TouchPhase.Began;
 				}
@@ -97,16 +105,123 @@ public class TouchControl : MonoBehaviour
 			if (Input.touchCount == 1) {
 				Touch touch = Input.touches [0];
 #endif
-				switch (touch.phase) {
-				case TouchPhase.Began:
-					touchPos = touch.position;
-					startTime = Time.time;
-					break;
-				case TouchPhase.Ended:
-					float swipeTime = Time.time - startTime;
-					float swipeDist = (touch.position - touchPos).magnitude;
+				switch (touch.phase)
+				{
+					case TouchPhase.Began:
+						touchPos = touch.position;
+						startTime = Time.time;
+						break;
+					case TouchPhase.Ended:
+						float swipeTime = Time.time - startTime;
+						float swipeDist = (touch.position - touchPos).magnitude;
 
-					if (((Mathf.Abs (touch.position.x - touchPos.x)) < VSwipeZone) && (swipeTime < maxSwipeTime) && (swipeDist > minSwipeDistance) && (Mathf.Sign (touch.position.y - touchPos.y) > 0) && (Mathf.Sign (touch.position.x - touchPos.x) < 2.5f) && (Mathf.Sign (touch.position.x - touchPos.x) > -2.5f && (OneFingerSwipe == true))) {
+#if true
+						if (Mathf.Abs(touch.position.y - touchPos.y) > Mathf.Abs(touch.position.x - touchPos.x))
+						{
+							if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDistance) && (Mathf.Sign(touch.position.y - touchPos.y) > 0) && (OneFingerSwipe == true))
+							{
+
+								//print("Single Finger Up Swipe");
+
+								singleFingerUpSwipe = true;
+								singleFingerDownSwipe = false;
+								singleFingerLeftSwipe = false;
+								singleFingerRightSwipe = false;
+								singleFingerTap = false;
+								singleFingerLogTap = false;
+								singleFingerDoubleTap = false;
+
+								doubleFingersUpSwipe = false;
+								doubleFingersDownSwipe = false;
+								doubleFingersLeftSwipe = false;
+								doubleFingersRightSwipe = false;
+								doubleFingersTap = false;
+								doubleFingersDoubleTap = false;
+								doubleFingersLogTap = false;
+
+								multiFingersTap = false;
+
+							}
+							else if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDistance) && Mathf.Sign(touch.position.y - touchPos.y) < 0 && (OneFingerSwipe == true))
+							{
+
+								//print("Single Finger Down Swipe");
+
+								singleFingerUpSwipe = false;
+								singleFingerDownSwipe = true;
+								singleFingerLeftSwipe = false;
+								singleFingerRightSwipe = false;
+								singleFingerTap = false;
+								singleFingerLogTap = false;
+								singleFingerDoubleTap = false;
+
+								doubleFingersUpSwipe = false;
+								doubleFingersDownSwipe = false;
+								doubleFingersLeftSwipe = false;
+								doubleFingersRightSwipe = false;
+								doubleFingersTap = false;
+								doubleFingersDoubleTap = false;
+								doubleFingersLogTap = false;
+
+								multiFingersTap = false;
+
+							}
+						}
+						else
+						{
+							if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDistance) && Mathf.Sign(touch.position.x - touchPos.x) < 0 && (OneFingerSwipe == true))
+							{
+
+								//print("Single Finger Left Swipe");
+
+								singleFingerUpSwipe = false;
+								singleFingerDownSwipe = false;
+								singleFingerLeftSwipe = true;
+								singleFingerRightSwipe = false;
+								singleFingerTap = false;
+								singleFingerLogTap = false;
+								singleFingerDoubleTap = false;
+
+								doubleFingersUpSwipe = false;
+								doubleFingersDownSwipe = false;
+								doubleFingersLeftSwipe = false;
+								doubleFingersRightSwipe = false;
+								doubleFingersTap = false;
+								doubleFingersDoubleTap = false;
+								doubleFingersLogTap = false;
+
+								multiFingersTap = false;
+
+							}
+							else if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDistance) && Mathf.Sign(touch.position.y - touchPos.y) > -2.5f && (OneFingerSwipe == true))
+							{
+								//print("Single Finger Right Swipe");
+
+								singleFingerUpSwipe = false;
+								singleFingerDownSwipe = false;
+								singleFingerLeftSwipe = false;
+								singleFingerRightSwipe = true;
+								singleFingerTap = false;
+								singleFingerLogTap = false;
+								singleFingerDoubleTap = false;
+
+								doubleFingersUpSwipe = false;
+								doubleFingersDownSwipe = false;
+								doubleFingersLeftSwipe = false;
+								doubleFingersRightSwipe = false;
+								doubleFingersTap = false;
+								doubleFingersDoubleTap = false;
+								doubleFingersLogTap = false;
+
+								multiFingersTap = false;
+							}
+						}
+						break;
+				}
+			}
+		}
+#else
+						if (((Mathf.Abs (touch.position.x - touchPos.x)) < VSwipeZone) && (swipeTime < maxSwipeTime) && (swipeDist > minSwipeDistance) && (Mathf.Sign (touch.position.y - touchPos.y) > 0) && (Mathf.Sign (touch.position.x - touchPos.x) < 2.5f) && (Mathf.Sign (touch.position.x - touchPos.x) > -2.5f && (OneFingerSwipe == true))) {
 												
 						print ("Single Finger Up Swipe");
 
@@ -193,35 +308,40 @@ public class TouchControl : MonoBehaviour
 						doubleFingersLogTap = false;
 						
 						multiFingersTap = false;												
+						}
+#endif
+#if false
+						else if ((swipeTime > longTapTime) && (OneFingerTap == true))
+						{
 
-					} else if ((swipeTime > longTapTime) && (OneFingerTap == true)) {
-												
-						print ("Single Finger Long Tap");
+							print("Single Finger Long Tap");
 
-						singleFingerUpSwipe = false;
-						singleFingerDownSwipe = false;
-						singleFingerLeftSwipe = false;
-						singleFingerRightSwipe = false;
-						singleFingerTap = false;
-						singleFingerLogTap = true;
-						singleFingerDoubleTap = false;
-						
-						doubleFingersUpSwipe = false;
-						doubleFingersDownSwipe = false;
-						doubleFingersLeftSwipe = false;
-						doubleFingersRightSwipe = false;
-						doubleFingersTap = false;
-						doubleFingersDoubleTap = false;
-						doubleFingersLogTap = false;
-						
-						multiFingersTap = false;
+							singleFingerUpSwipe = false;
+							singleFingerDownSwipe = false;
+							singleFingerLeftSwipe = false;
+							singleFingerRightSwipe = false;
+							singleFingerTap = false;
+							singleFingerLogTap = true;
+							singleFingerDoubleTap = false;
 
-						tapping = false;
+							doubleFingersUpSwipe = false;
+							doubleFingersDownSwipe = false;
+							doubleFingersLeftSwipe = false;
+							doubleFingersRightSwipe = false;
+							doubleFingersTap = false;
+							doubleFingersDoubleTap = false;
+							doubleFingersLogTap = false;
 
-					} else if (!tapping) {
-						tapping = true;
-						StartCoroutine (SingleTap ());
-					}
+							multiFingersTap = false;
+
+							tapping = false;
+
+						}
+						else if (!tapping)
+						{
+							tapping = true;
+							StartCoroutine(SingleTap());
+						}
 
 					if (((Time.time - lastTap) < doubleTapTime) && (OneFingerTap == true)) {
 
@@ -252,7 +372,8 @@ public class TouchControl : MonoBehaviour
 					break;
 				}
 			}
-		}
+						}
+#endif
 
 		if (Input.touchCount == 2) {
 			multiTouch = true;
@@ -533,5 +654,27 @@ public class TouchControl : MonoBehaviour
 
 			twoFingersTapping = false;
 		}
+	}
+
+	public void Reset()
+	{
+
+		singleFingerUpSwipe = false;
+		singleFingerDownSwipe = false;
+		singleFingerLeftSwipe = false;
+		singleFingerRightSwipe = false;
+		singleFingerTap = false;
+		singleFingerLogTap = false;
+		singleFingerDoubleTap = false;
+
+		doubleFingersUpSwipe = false;
+		doubleFingersDownSwipe = false;
+		doubleFingersLeftSwipe = false;
+		doubleFingersRightSwipe = false;
+		doubleFingersTap = false;
+		doubleFingersDoubleTap = false;
+		doubleFingersLogTap = false;
+
+		multiFingersTap = false;
 	}
 }
