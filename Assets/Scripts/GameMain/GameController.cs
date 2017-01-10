@@ -115,7 +115,7 @@ public class GameController : MonoBehaviour {
 					break;
 			}
 		}
-		PuzzleController.GetInstance().SpawnChip(chiptype);
+		PuzzleController.GetInstance().SpawnChip(chiptype, 5);
 
 		yield return new WaitForSeconds(0.2f);
 		swipableFlag = true;

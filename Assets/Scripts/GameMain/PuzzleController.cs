@@ -62,7 +62,7 @@ public class PuzzleController : MonoBehaviour {
 		return new Vector2(ChipPos_x((int)pos.x), ChipPos_y((int)pos.y));
 	}
 
-	public void SetChip( Vector2 pos, GameChip.CHIP_TYPE type )
+	public GameChip SetChip( Vector2 pos, GameChip.CHIP_TYPE type )
 	{
 		if (chipData[(int)pos.x, (int)pos.y] == null)
 		{
@@ -73,7 +73,9 @@ public class PuzzleController : MonoBehaviour {
 			chipData[(int)pos.x,(int)pos.y] = obj;
 
 			chipTypeCount[(int)type]++;
+			return obj.GetComponent<GameChip>();
 		}
+		return null;
 	}
 
 	void DestroyChip(int x, int y, GameChip.CHIP_TYPE type)
@@ -90,13 +92,48 @@ public class PuzzleController : MonoBehaviour {
 		}
 	}
 
+	void DamageChip(int x, int y, int dmg)
+	{
+		if (chipData[x, y])
+		{
+			GameChip.CHIP_TYPE type = chipData[x, y].GetComponent<GameChip>().GetChipType();
+			if ( chipData[x, y].GetComponent<GameChip>().Damaged(dmg))
+			{
+				chipData[x, y] = null;
+				chipTypeCount[(int)type]--;
+			}
+		}
+		else
+		{
+			print("ERROR:Not found data : ");
+		}
+	}
+
+	int GetWeapon(int x, int y)
+	{
+		if (chipData[x, y])
+		{
+			GameChip chip = chipData[x, y].GetComponent<GameChip>();
+			if(chip.GetChipType() == GameChip.CHIP_TYPE.weapon)
+			{
+				int attpt = chip.GetAttackPoint();
+				chipData[x, y].GetComponent<GameChip>().GetWeapon();
+				chipData[x, y] = null;
+				chipTypeCount[(int)GameChip.CHIP_TYPE.weapon]--;
+				return attpt;
+			}
+		}
+		return 0;
+	}
+
+
 	public int ChipCount(GameChip.CHIP_TYPE type)
 	{
 		return chipTypeCount[(int)type];
 	}
 
 	// 空きを探してチップを配置する
-	public bool SpawnChip(GameChip.CHIP_TYPE type)
+	public bool SpawnChip(GameChip.CHIP_TYPE type, int hitPoint = 10)
 	{
 		List<Vector2> chiptable = new List<Vector2>();
 		for (int x = 0; x < PuzzleMeshWidth; x++)
@@ -117,7 +154,11 @@ public class PuzzleController : MonoBehaviour {
 			return false;
 		}
 
-		SetChip(chiptable[Random.Range(0, chiptable.Count)], type);
+		GameChip chip = SetChip(chiptable[Random.Range(0, chiptable.Count)], type);
+		if (chip != null)
+		{
+			chip.SetHitPoint(hitPoint);
+		}
 		return true;
 	}
 
@@ -355,6 +396,7 @@ public class PuzzleController : MonoBehaviour {
 		int target_x = chip_x;
 		int target_y = chip_y;
 
+		// 行先を決める
 		for ( int v = 0; v < PuzzleMeshWidth; v++)
 		{
 			if( ((target_x+step_x[(int)moveang])<0)
@@ -377,34 +419,35 @@ public class PuzzleController : MonoBehaviour {
 			}
 		}
 
-		if ((chip_x != target_x) || (chip_y != target_y)) {
-			chipData[target_x, target_y] = chipData[chip_x, chip_y];
-			iTween.MoveTo(chipData[chip_x, chip_y], iTween.Hash(
-				"x", ChipPos_x(target_x),
-				"y", ChipPos_y(target_y),
-				"easeType", iTween.EaseType.easeOutQuint,
-				"time", 0.4f,
-				"isLocal", true));
-			chipData[chip_x, chip_y] = null;
-		}
-
 		if (actionFlag)
 		{
 			GameObject obj = chipData[target_x + step_x[(int)moveang], target_y + step_y[(int)moveang]];
 			GameChip targetChip = obj.GetComponent<GameChip>();
 			switch (type){
 				case GameChip.CHIP_TYPE.player:
+					GameChip player = chipData[chip_x, chip_y].GetComponent<GameChip>();
 					switch (targetChip.GetChipType())
 					{
 						case GameChip.CHIP_TYPE.enemy:
-							DestroyChip(target_x + step_x[(int)moveang], target_y + step_y[(int)moveang], GameChip.CHIP_TYPE.enemy);
+							{
+								int dmg = targetChip.GetHitPoint();
+								if( dmg < player.GetAttackPoint())
+								{	// 攻撃力が足りないと殺せない
+									DamageChip(target_x + step_x[(int)moveang], target_y + step_y[(int)moveang], dmg);
+									player.SubAttackPoint(dmg);
+								}
+							}
 							break;
 
 						case GameChip.CHIP_TYPE.tree:
 							DestroyChip(target_x + step_x[(int)moveang], target_y + step_y[(int)moveang], GameChip.CHIP_TYPE.tree);
 							break;
 						case GameChip.CHIP_TYPE.weapon:
-							DestroyChip(target_x + step_x[(int)moveang], target_y + step_y[(int)moveang], GameChip.CHIP_TYPE.weapon);
+							// 武器は拾うので武器の位置に移動
+							print("Get weapon");
+							player.AddAttackPoint( GetWeapon(target_x + step_x[(int)moveang], target_y + step_y[(int)moveang]) );
+							target_x += step_x[(int)moveang];
+							target_y += step_y[(int)moveang];
 							break;
 					}
 					break;
@@ -418,6 +461,19 @@ public class PuzzleController : MonoBehaviour {
 					}
 					break;	
 			}
+		}
+
+		// 駒を移動させる
+		if ((chip_x != target_x) || (chip_y != target_y))
+		{
+			chipData[target_x, target_y] = chipData[chip_x, chip_y];
+			iTween.MoveTo(chipData[chip_x, chip_y], iTween.Hash(
+				"x", ChipPos_x(target_x),
+				"y", ChipPos_y(target_y),
+				"easeType", iTween.EaseType.easeOutQuint,
+				"time", 0.4f,
+				"isLocal", true));
+			chipData[chip_x, chip_y] = null;
 		}
 		return actionFlag;
 	}
